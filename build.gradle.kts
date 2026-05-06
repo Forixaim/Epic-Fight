@@ -273,13 +273,13 @@ publishMods {
     modLoaders.add("forge")
 
     // Type of the release: ALPHA, BETA, STABLE
-    type = BETA
+    type = STABLE
 
     // The name of the file appeared in publishing websites
     displayName = getFullModVersion()
 
     file.set(tasks.named<Jar>("reobfJar").flatMap { it.archiveFile })
-    additionalFiles.from(tasks.named<Jar>("sourcesJar").flatMap { it.archiveFile }, apiJar, apiSourcesJar)
+   // additionalFiles.from(tasks.named<Jar>("sourcesJar").flatMap { it.archiveFile }, apiJar, apiSourcesJar)
 
     // Curseforge publishing info
     curseforge {
