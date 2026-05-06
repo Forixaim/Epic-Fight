@@ -1,3 +1,5 @@
+import net.neoforged.moddevgradle.legacyforge.dsl.MixinExtension
+
 plugins {
     alias(libs.plugins.eclipse)
     alias(libs.plugins.idea)
@@ -156,6 +158,7 @@ dependencies {
     modCompileOnly(libs.firstperson)
     modCompileOnly(libs.shouldersurfing)
     modCompileOnly(libs.creativecore)
+    annotationProcessor("org.spongepowered:mixin:0.8.5:processor")
 
     // CurseMaven Dependencies
     modCompileOnly(libs.azurelib.armor)
@@ -177,27 +180,22 @@ dependencies {
     // Modrinth-migrated dependencies
     modCompileOnly(libs.embeddium)
     modCompileOnly(libs.oculus)
-    annotationProcessor("org.spongepowered:mixin:0.8.5:processor")
 
-}
-
-mixin {
-    add(sourceSets.main.get(), "epicfight.mixins.refmap.json")
 }
 
 tasks.named<ProcessResources>("processResources").configure {
     val replaceProperties: Map<String, String> = mapOf(
-            "minecraft_version" to minecraft_version,
-            "minecraft_version_range" to minecraft_version_range,
-            "forge_version" to forge_version,
-            "forge_version_range" to forge_version_range,
-            "loader_version_range" to loader_version_range,
-            "mod_id" to mod_id,
-            "mod_name" to mod_name,
-            "mod_license" to mod_license,
-            "mod_version" to mod_version,
-            "mod_authors" to mod_authors,
-            "mod_description" to mod_description
+        "minecraft_version" to minecraft_version,
+        "minecraft_version_range" to minecraft_version_range,
+        "forge_version" to forge_version,
+        "forge_version_range" to forge_version_range,
+        "loader_version_range" to loader_version_range,
+        "mod_id" to mod_id,
+        "mod_name" to mod_name,
+        "mod_license" to mod_license,
+        "mod_version" to mod_version,
+        "mod_authors" to mod_authors,
+        "mod_description" to mod_description
     )
 
     inputs.properties(replaceProperties)
@@ -217,6 +215,10 @@ java.sourceSets.main.get().java.srcDirs(
     tasks.generateSoundKeys.map { it.outputs.files.singleFile }
 )
 
+extensions.configure<MixinExtension> {
+    add(sourceSets.main.get(), "mixins.epicfight.refmap.json")
+    config("mixins.epicfight.json")
+}
 
 tasks.named<Jar>("jar").configure {
     manifest {
@@ -233,6 +235,7 @@ val apiJar: TaskProvider<Jar> = tasks.register<Jar>("apiJar") {
     from(sourceSets.main.get().output) {
         include(apiPackage)
     }
+    finalizedBy(tasks.named("reobfJar"))
 }
 
 val apiSourcesJar: TaskProvider<Jar> = tasks.register<Jar>("apiSourcesJar") {
@@ -242,6 +245,7 @@ val apiSourcesJar: TaskProvider<Jar> = tasks.register<Jar>("apiSourcesJar") {
     from(sourceSets.main.get().allSource) {
         include(apiPackage)
     }
+    finalizedBy(tasks.named("reobfJar"))
 }
 
 val TaskContainer.jar: TaskProvider<Jar>
@@ -269,7 +273,7 @@ publishMods {
     modLoaders.add("forge")
 
     // Type of the release: ALPHA, BETA, STABLE
-    type = STABLE
+    type = BETA
 
     // The name of the file appeared in publishing websites
     displayName = getFullModVersion()
@@ -295,7 +299,6 @@ publishMods {
         webhookUrl = providers.environmentVariable("EPIC_FIGHT_DISCORD_WEBHOOK")
         dryRunWebhookUrl = providers.environmentVariable("DRY_RUN_DISCORD_WEBHOOK")
         username = "Update Notification"
-
         avatarUrl = "https://i.imgur.com/FrxDviN.png"
         content = changelog.map { "<@&1074034800849059930>\n# Epic Fight ${mod_version} is out!\nMinecraft version: ${minecraft_version}\nForge version: ${forge_version}\n" + latestChangelog }
 
