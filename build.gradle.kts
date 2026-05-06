@@ -177,7 +177,12 @@ dependencies {
     // Modrinth-migrated dependencies
     modCompileOnly(libs.embeddium)
     modCompileOnly(libs.oculus)
+    annotationProcessor("org.spongepowered:mixin:0.8.5:processor")
 
+}
+
+mixin {
+    add(sourceSets.main.get(), "epicfight.mixins.refmap.json")
 }
 
 tasks.named<ProcessResources>("processResources").configure {
@@ -274,22 +279,23 @@ publishMods {
 
     // Curseforge publishing info
     curseforge {
-        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        accessToken = providers.environmentVariable("EPIC_FIGHT_CURSEFORGE_API")
         projectId = "405076"
         minecraftVersions.add("1.20.1")
         projectSlug = "epic-fight-mod"
     }
     // Modrinth publishing info
     modrinth {
-        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        accessToken = providers.environmentVariable("EPIC_FIGHT_MODRINTH_API")
         projectId = "vu3NZ5Ma"
         minecraftVersions.add("1.20.1")
     }
     // Discord webhook and notification settings
     discord {
-        webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
+        webhookUrl = providers.environmentVariable("EPIC_FIGHT_DISCORD_WEBHOOK")
         dryRunWebhookUrl = providers.environmentVariable("DRY_RUN_DISCORD_WEBHOOK")
         username = "Update Notification"
+
         avatarUrl = "https://i.imgur.com/FrxDviN.png"
         content = changelog.map { "<@&1074034800849059930>\n# Epic Fight ${mod_version} is out!\nMinecraft version: ${minecraft_version}\nForge version: ${forge_version}\n" + latestChangelog }
 
